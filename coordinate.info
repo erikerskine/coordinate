@@ -1,0 +1,3 @@
+name = coordinate
+description = Field type to store a latitude/longitude coordinate.
+core = 7.x

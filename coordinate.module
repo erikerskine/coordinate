@@ -1,0 +1,160 @@
+<?php
+
+/**
+ * Implements hook_init().
+ */
+function coordinate_init() {
+  drupal_add_js('http://maps.google.com/maps/api/js?sensor=false', 'external');
+  drupal_add_js(drupal_get_path('module', 'coordinate') . '/map.js');
+}
+
+/**
+ * Implements hook_field_info().
+ */
+function coordinate_field_info() {
+  return array(
+    'coordinate' => array(
+      'label' => 'Latitude/longitude coordinate',
+      'default_widget' => 'coordinate_default',
+      'default_formatter' => 'coordinate_default',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_settings_form().
+ */
+function coordinate_field_settings_form($field, $instance, $has_data) {
+  $settings = $field['settings'];
+  $form = array();
+  return $form;
+}
+
+/**
+ * Implements hook_field_instance_settings_form().
+ */
+function coordinate_field_instance_settings_form($field, $instance) {
+  $settings = $instance['settings'];
+  $form = array();
+  return $form;
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function coordinate_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function coordinate_field_is_empty($item, $field) {
+  switch ($field['type']) {
+    case 'coordinate':
+      return empty($item['latitude']) || empty($item['longitude']);
+  }
+}
+
+
+/* widgets */
+
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function coordinate_field_widget_info() {
+  return array(
+    'coordinate_default' => array(
+      'label' => t('Default'),
+      'field types' => array('coordinate'),
+    ),
+    'coordinate_map' => array(
+      'label' => t('Map'),
+      'field types' => array('coordinate'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function coordinate_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  switch ($instance['widget']['type']) {
+    case 'coordinate_default':
+      return _coordinate_default_widget_form($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
+    case 'coordinate_map':
+      return _coordinate_map_widget_form($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
+  }
+  return $element;
+}
+
+function _coordinate_default_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $element['latitude'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Latitude'),
+    '#default_value' => isset($items[$delta]['latitude']) ? $items[$delta]['latitude'] : '',
+  );
+  $element['longitude'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Longitude'),
+    '#default_value' => isset($items[$delta]['longitude']) ? $items[$delta]['longitude'] : '',
+  );
+  return $element;
+}
+
+function _coordinate_map_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  $element['map'] = array(
+    '#markup' => '<div id="coordinate-field-map-canvas" style="background: orange; width: 300px; height: 200px;"></div>',
+  );
+  $element['latitude'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Latitude'),
+    //'#disabled' => TRUE,
+    '#default_value' => isset($items[$delta]['latitude']) ? $items[$delta]['latitude'] : '',
+    '#prefix' => '<div class="coordinate-field-latitude">',
+    '#suffix' => '</div>',
+  );
+  $element['longitude'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Longitude'),
+    //'#disabled' => TRUE,
+    '#default_value' => isset($items[$delta]['longitude']) ? $items[$delta]['longitude'] : '',
+    '#prefix' => '<div class="coordinate-field-longitude">',
+    '#suffix' => '</div>',
+  );
+  return $element;
+}
+
+
+/* formatters */
+  
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function coordinate_field_formatter_info() {
+  return array(
+    'coordinate_default' => array(
+      'label' => t('Default'),
+      'field types' => array('coordinate'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function coordinate_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  switch ($display['type']) {
+    case 'coordinate_default':
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+          '#markup' => (isset($item['latitude']) ? $item['latitude'] : '') . ',' . (isset($item['longitude']) ? $item['longitude'] : ''),
+        );
+      }
+      break;
+  }
+  return $element;
+}
+

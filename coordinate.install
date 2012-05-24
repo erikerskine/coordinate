@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * Implements hook_field_schema().
+ */
+function coordinate_field_schema($field) {
+  switch ($field['type']) {
+
+    case 'coordinate':
+      $columns = array(
+        'latitude' => array(
+          'type' => 'numeric',
+          'precision' => 10,
+          'scale' => 7,
+          'not null' => FALSE,
+        ),
+        'longitude' => array(
+          'type' => 'numeric',
+          'precision' => 10,
+          'scale' => 7,
+          'not null' => FALSE,
+        ),
+      );
+      return array(
+        'columns' => $columns,
+      );
+
+  }
+}
